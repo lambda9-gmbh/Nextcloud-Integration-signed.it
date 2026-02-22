@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "openapi": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", "@ivotoby/openapi-mcp-server",
+        "--spec-file", "../digisign/src/main/resources/static/api.yaml",
+        "--api-base-url", "http://localhost:7755"
+      ]
+    },
+    "postgres": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y", "@modelcontextprotocol/server-postgres",
+        "postgres://nextcloud:nextcloud@localhost:5433/nextcloud"
+      ]
+    }
+  }
+}

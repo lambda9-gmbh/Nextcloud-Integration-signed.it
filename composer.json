@@ -1,0 +1,23 @@
+{
+    "name": "lambda9/integration_signd",
+    "description": "Digital document signing with signd.it for Nextcloud",
+    "type": "project",
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "lambda9 GmbH",
+            "email": "support@lambda9.de"
+        }
+    ],
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "OCA\\IntegrationSignd\\": "lib/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

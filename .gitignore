@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build output
+js/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/

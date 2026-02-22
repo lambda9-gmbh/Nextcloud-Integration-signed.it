@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>integration_signd</id>
+    <name>signd.it Integration</name>
+    <summary>Digital document signing with signd.it</summary>
+    <description><![CDATA[Integrate signd.it digital signing into your Nextcloud.
+
+Start signature processes directly from your file browser, track signing status, and automatically sync signed documents back into your cloud.
+
+**Features:**
+- Start signing processes for PDF documents
+- Track signature status in the file sidebar
+- Automatic download of signed documents
+- Admin settings for API key management
+]]></description>
+    <version>0.1.0</version>
+    <licence>agpl</licence>
+    <author mail="support@lambda9.de">lambda9 GmbH</author>
+    <namespace>IntegrationSignd</namespace>
+    <category>integration</category>
+
+    <dependencies>
+        <php min-version="8.1"/>
+        <nextcloud min-version="30" max-version="32"/>
+    </dependencies>
+
+    <navigations>
+        <navigation>
+            <name>signd.it</name>
+            <route>integration_signd.page.index</route>
+            <icon>app.svg</icon>
+        </navigation>
+    </navigations>
+
+    <settings>
+        <admin>OCA\IntegrationSignd\Settings\AdminSettings</admin>
+        <admin-section>OCA\IntegrationSignd\Settings\AdminSection</admin-section>
+    </settings>
+</info>
