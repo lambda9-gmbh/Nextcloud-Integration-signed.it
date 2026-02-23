@@ -15,5 +15,10 @@ js/
 .DS_Store
 Thumbs.db
 
+# Test caches & reports
+.phpunit.cache/
+playwright-report/
+test-results/
+
 # Claude Code
 .claude/

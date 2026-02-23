@@ -47,6 +47,12 @@ src/
   main-settings.ts    Entrypoint: Admin-Settings
   main-files.ts       Entrypoint: FileAction + Sidebar-Tab (Legacy, NC 30-32)
   main-overview.ts    Entrypoint: Übersichtsseite (Prozessliste + Detail-Sidebar)
+tests/
+  Unit/               PHPUnit Unit-Tests (spiegelt lib/)
+  frontend/           Vitest Frontend-Tests (spiegelt src/)
+    setup.ts          Globale Mocks (@nextcloud/axios, router, l10n, initial-state)
+e2e/                  Playwright E2E-Tests
+  fixtures/           Test-Fixtures (Login etc.)
 docs/                 Entscheidungen, Recherche, Status
 ```
 
@@ -74,3 +80,50 @@ npm run logs                   # Container-Logs
 ```
 
 NC: http://localhost:8080 (admin/admin), signd lokal: localhost:7755
+
+## Tests
+
+Drei Testebenen, alle aktiv:
+
+### PHPUnit (Backend Unit-Tests)
+
+```bash
+composer install
+vendor/bin/phpunit --testsuite Unit
+```
+
+- Config: `phpunit.xml`, Testsuites `Unit` + `Integration`
+- Tests in `tests/Unit/` — Struktur spiegelt `lib/`
+- Mocking: PHPUnit MockBuilder für NC-Interfaces (`IClientService`, `IConfig`, `LoggerInterface`)
+- `tests/bootstrap.php` registriert OCP-Namespace manuell (nextcloud/ocp hat kein eigenes Autoloading)
+- Kein laufender NC-Server nötig
+
+### Vitest (Frontend Unit-/Komponenten-Tests)
+
+```bash
+npm test              # einmaliger Lauf
+npm run test:watch    # Watch-Modus
+```
+
+- Config: `vitest.config.ts` (separate Datei, nicht in vite.config.ts — `createAppConfig` nicht erweiterbar)
+- Tests in `tests/frontend/` — Struktur spiegelt `src/`
+- `tests/frontend/setup.ts` mockt `@nextcloud/axios`, `@nextcloud/router`, `@nextcloud/l10n`, `@nextcloud/initial-state`
+- `@nextcloud/vue`-Komponenten (NcButton etc.) als Stubs mit `inheritAttrs: false` in Tests
+- happy-dom als Test-Environment, globals aktiv
+
+### Playwright (E2E-Tests)
+
+```bash
+# Voraussetzung: Docker-Umgebung + App müssen laufen
+npm run test:e2e           # headless
+npm run test:e2e:headed    # mit Browser-Fenster
+```
+
+- Config: `playwright.config.ts`, nur Chromium, single worker, baseURL `localhost:8080`
+- Tests in `e2e/`, Login-Fixture in `e2e/fixtures/auth.ts` (admin/admin)
+
+### Konventionen
+
+- PHP-Tests: `FooTest.php` testet `Foo.php`
+- Frontend-Tests: `foo.test.ts` mit `@vue/test-utils` für Komponenten
+- Neue Features/Bugfixes: passende Tests mitliefern

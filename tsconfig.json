@@ -16,7 +16,8 @@
         },
         "types": [
             "node",
-            "vite/client"
+            "vite/client",
+            "vitest/globals"
         ],
         "lib": [
             "ESNext",
@@ -28,7 +29,8 @@
     "include": [
         "src/**/*.ts",
         "src/**/*.d.ts",
-        "src/**/*.vue"
+        "src/**/*.vue",
+        "tests/frontend/**/*.ts"
     ],
     "exclude": [
         "node_modules"

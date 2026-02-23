@@ -72,6 +72,44 @@ Falls die URL manuell geändert werden soll:
 npm run occ -- config:app:set integration_signd api_url --value=http://host.docker.internal:7755
 ```
 
+## Tests
+
+### Backend (PHPUnit)
+
+```bash
+composer install
+vendor/bin/phpunit --testsuite Unit
+```
+
+Kein laufender NC-Server nötig — alle Unit-Tests nutzen Mocks für NC-Interfaces.
+
+### Frontend (Vitest)
+
+```bash
+npm install
+npm test              # einmaliger Lauf
+npm run test:watch    # Watch-Modus für Entwicklung
+```
+
+### E2E (Playwright)
+
+Voraussetzung: Docker-Umgebung + App müssen laufen.
+
+```bash
+npm run up && npm run build && npm run enable-app
+npm run test:e2e           # headless
+npm run test:e2e:headed    # mit Browser-Fenster
+```
+
+Teststruktur:
+```
+tests/
+  Unit/                 PHPUnit Unit-Tests (spiegelt lib/)
+  frontend/             Vitest Frontend-Tests (spiegelt src/)
+e2e/                    Playwright E2E-Tests
+  fixtures/             Test-Fixtures (Login etc.)
+```
+
 ## Architektur
 
 ```

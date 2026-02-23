@@ -123,5 +123,24 @@
 
 ## Testing-Strategie
 
-- **v1 (NC 30-32):** Manuelles Testen gegen alle drei NC-Versionen via Docker Multi-Version-Setup (Profile/Variable). Deckt Sidebar-Tab, FileAction, Tab-Registrierung ab.
-- **v2 (NC 33+):** Automatisierte E2E-Integrationstests geplant (zusammen mit dem Wechsel auf das neue Web-Component-basierte Sidebar-API).
+Drei Testebenen, alle ab v1 aktiv:
+
+### PHPUnit (Backend Unit-Tests)
+- **Config:** `phpunit.xml`, Testsuites `Unit` + `Integration`
+- **Verzeichnis:** `tests/Unit/`, `tests/Integration/`
+- **Konventionen:** Ein Testfile pro Klasse (`FooTest.php` → `Foo.php`), Mocking via PHPUnit MockBuilder für NC-Interfaces (`IClientService`, `IConfig`, `LoggerInterface`)
+- **Ausführung:** `vendor/bin/phpunit --testsuite Unit`
+- Kein laufender NC-Server nötig für Unit-Tests
+
+### Vitest (Frontend Unit-/Komponenten-Tests)
+- **Config:** `vitest.config.ts` (separate Config, nicht in `vite.config.ts`)
+- **Verzeichnis:** `tests/frontend/`, Struktur spiegelt `src/`
+- **Setup:** `tests/frontend/setup.ts` mockt `@nextcloud/axios`, `@nextcloud/router`, `@nextcloud/l10n`, `@nextcloud/initial-state`
+- **Konventionen:** `*.test.ts`, `@vue/test-utils` für Komponenten, happy-dom als Environment
+- **Ausführung:** `npm test` (einmalig) / `npm run test:watch` (dev)
+
+### Playwright (E2E-Tests)
+- **Config:** `playwright.config.ts`, nur Chromium, single worker
+- **Verzeichnis:** `e2e/`, Fixtures in `e2e/fixtures/`
+- **Voraussetzung:** Docker-Umgebung läuft (`docker compose up -d` + `npm run build` + `npm run enable-app`)
+- **Ausführung:** `npm run test:e2e` / `npm run test:e2e:headed`
