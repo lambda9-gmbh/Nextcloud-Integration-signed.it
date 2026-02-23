@@ -1,192 +1,192 @@
-# sign API - Analyse
+# signd API - Analysis
 
-> Siehe auch: [decisions.md](decisions.md) | [research-nextcloud-app-dev.md](research-nextcloud-app-dev.md) | [status.md](status.md)
+> See also: [decisions.md](decisions.md) | [research-nextcloud-app-dev.md](research-nextcloud-app-dev.md) | [status.md](status.md)
 >
-> **OpenAPI Spec (Quelle der Wahrheit):** `../digisign/src/main/resources/static/api.yaml`
+> **OpenAPI Spec (source of truth):** `../digisign/src/main/resources/static/api.yaml`
 
-**Basis-URL:** (konfigurierbar, z.B. `https://signd.it`)
-**API-Spezifikation:** OpenAPI 3.0.3
-**Authentifizierung:** `X-API-KEY` Header (pro Account)
+**Base URL:** (configurable, e.g. `https://signd.it`)
+**API Specification:** OpenAPI 3.0.3
+**Authentication:** `X-API-KEY` header (per account)
 
-## Endpunkte
+## Endpoints
 
-### Authentifizierung & Account
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| POST | `/api/v2/api-login` | Login mit E-Mail/Passwort → API-Key + User-Daten + Rechte |
-| POST | `/api/register-account` | Neuen sign-Account registrieren → accountId + userId + API-Key |
-| POST | `/api/prices` | Preisinfos für Produktpläne (premium/enterprise) abrufen |
+### Authentication & Account
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v2/api-login` | Login with email/password → API key + user data + permissions |
+| POST | `/api/register-account` | Register new signd account → accountId + userId + API key |
+| POST | `/api/prices` | Retrieve price info for product plans (premium/enterprise) |
 
-### Prozess-Erstellung
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| POST | `/api/new` | Neuen Signatur-Prozess erstellen (vollständig per API) |
-| POST | `/api/start-wizard` | Draft erstellen → Wizard-URL zum Fertigstellen in sign-UI |
-| POST | `/api/resume-wizard` | Draft-Wizard fortsetzen → URL |
-| POST | `/api/cancel-wizard` | Draft löschen |
+### Process Creation
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/new` | Create new signature process (fully via API) |
+| POST | `/api/start-wizard` | Create draft → wizard URL to complete in signd UI |
+| POST | `/api/resume-wizard` | Resume draft wizard → URL |
+| POST | `/api/cancel-wizard` | Delete draft |
 
-### Prozess-Verwaltung
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| POST | `/api/cancel-process` | Prozess abbrechen (mit Begründung) |
-| POST | `/api/resume-process` | Unterbrochenen Prozess fortsetzen |
-| POST | `/api/update-client-metadata` | Metadaten eines Prozesses aktualisieren |
+### Process Management
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/cancel-process` | Cancel process (with reason) |
+| POST | `/api/resume-process` | Resume interrupted process |
+| POST | `/api/update-client-metadata` | Update metadata of a process |
 
-### Prozess-Abfrage
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| GET | `/api/get-meta?id=...` | Metadaten eines Prozesses/Drafts per ID |
-| GET | `/api/list` | Prozesse suchen/filtern (paginiert, viele Filter) |
-| GET | `/api/list-status` | Prozess-Status-Infos (kompakt) |
-| GET | `/api/new-finished?gt=...` | IDs fertiggestellter Prozesse nach Zeitstempel |
-| POST | `/api/find-by-original` | Prozess anhand der Original-PDF finden |
+### Process Query
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/get-meta?id=...` | Metadata of a process/draft by ID |
+| GET | `/api/list` | Search/filter processes (paginated, many filters) |
+| GET | `/api/list-status` | Process status info (compact) |
+| GET | `/api/new-finished?gt=...` | IDs of finished processes after timestamp |
+| POST | `/api/find-by-original` | Find process by original PDF |
 
-### Dokument-Download
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| GET | `/api/finished?id=...` | Fertiggestelltes PDF herunterladen |
+### Document Download
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/finished?id=...` | Download finished PDF |
 
-### Hilfsfunktionen
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| POST | `/api/upload-check` | PDF auf Signatur-Integrität prüfen → Redirect-URL |
-| POST | `/api/base64-encode` | Binärdaten → Base64 |
-| POST | `/api/base64-decode` | Base64 → Binärdaten |
-| GET | `/api/user-info` | Info über API-User |
+### Utility Functions
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/upload-check` | Check PDF for signature integrity → redirect URL |
+| POST | `/api/base64-encode` | Binary data → Base64 |
+| POST | `/api/base64-decode` | Base64 → binary data |
+| GET | `/api/user-info` | Info about API user |
 
 ### Callback / Notification
-| Methode | Pfad | Beschreibung |
-|---------|------|-------------|
-| POST | (konfigurierbare URL) | Webhook-Notification bei Events |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | (configurable URL) | Webhook notification on events |
 
-## Wichtige Datenmodelle
+## Key Data Models
 
-### NewDocumentRequest (Prozess erstellen)
-**Pflichtfelder:**
-- `pdfFilename` - Dateiname der PDF
-- `pdfData` - PDF als Base64-String
-- `signersMode` - `SEQUENCE` (ein Dokument, nacheinander) oder `SPREAD` (jeder Unterzeichner eigene Kopie)
+### NewDocumentRequest (Create Process)
+**Required fields:**
+- `pdfFilename` - PDF filename
+- `pdfData` - PDF as Base64 string
+- `signersMode` - `SEQUENCE` (one document, sequential) or `SPREAD` (each signer gets own copy)
 
-**Optionale Felder:**
-- `initiatorName`, `initiatorEmail` - Absenderinfo
-- `name` - Prozessname
-- `emailRecipients[]` / `mobileRecipients[]` - Unterzeichner (per E-Mail/SMS)
-- `individualInvitation/Reminder/Cancellation/Completion` - Individuelle Texte
-- `pdfPassword` / `generatePassword` - PDF-Passwortschutz
-- `callbackUrl` - Webhook für Status-Updates
-- `protocolPlacement` - Protokoll am Anfang/Ende/gar nicht
-- `deadline` - Globale Frist
-- `apiClientMetaData` - Anwendungsspezifische Metadaten (JSON)
-- `individualEmailSenderAddress/Name` - Eigene Absenderadresse (bei Custom-SMTP)
+**Optional fields:**
+- `initiatorName`, `initiatorEmail` - Sender info
+- `name` - Process name
+- `emailRecipients[]` / `mobileRecipients[]` - Signers (via email/SMS)
+- `individualInvitation/Reminder/Cancellation/Completion` - Custom texts
+- `pdfPassword` / `generatePassword` - PDF password protection
+- `callbackUrl` - Webhook for status updates
+- `protocolPlacement` - Protocol at beginning/end/none
+- `deadline` - Global deadline
+- `apiClientMetaData` - Application-specific metadata (JSON)
+- `individualEmailSenderAddress/Name` - Custom sender address (with custom SMTP)
 
-### RecipientData (Unterzeichner)
-- `sequence` (Pflicht) - Reihenfolge/Grupppierung
+### RecipientData (Signer)
+- `sequence` (required) - Order/grouping
 - `clearName` - Name
-- `accessCode` - Optionaler Zugangs-Code
-- `inlineSignaturePlacements[]` - Positionierung der Signatur im PDF
+- `accessCode` - Optional access code
+- `inlineSignaturePlacements[]` - Signature positioning in the PDF
 - `stampMode` - `required` / `optional` / `none`
-- `additionalInputs[]` - Zusätzliche Eingabefelder
+- `additionalInputs[]` - Additional input fields
 
 ### EmailRecipient / MobileRecipient
-- Erbt von RecipientData
-- + `email` bzw. `mobile`
+- Inherits from RecipientData
+- + `email` or `mobile`
 
-### FoundProcess (Prozess-Ergebnis)
+### FoundProcess (Process Result)
 - `documentId`, `multiProcessKey`, `secretKey`
 - `name`, `created`, `initiator`, `filename`
 - `signersCompleted[]`, `signersRejected[]`, `signersPending[]`
 - `apiClientMetaData`
 - `lastSignerAction`, `interrupted`, `cancelled`
 
-### CreatedDocument (Antwort auf `/api/new`)
-- `id` - Dokument-ID
-- `hash` - SHA-512 des Originals (Base64)
-- `signerUrls[]` - Sign-URLs pro Unterzeichner
-- `password` (optional, wenn generiert)
+### CreatedDocument (Response to `/api/new`)
+- `id` - Document ID
+- `hash` - SHA-512 of the original (Base64)
+- `signerUrls[]` - Sign URLs per signer
+- `password` (optional, if generated)
 - `warnings[]`
-- `additionalIdsCreated[]` (bei SPREAD-Modus)
+- `additionalIdsCreated[]` (in SPREAD mode)
 
 ### Notification (Webhook)
 - `trigger` - `SIGNED` | `REJECTED` | `FINISHED` | `CANCELLED`
-- `process` - FoundProcess-Objekt
-- `signer` - UUID des auslösenden Unterzeichners (bei SIGNED/REJECTED)
+- `process` - FoundProcess object
+- `signer` - UUID of the triggering signer (for SIGNED/REJECTED)
 
-## Prozess-Modi
+## Process Modes
 
 ### SEQUENCE
-Alle Teilnehmer unterschreiben **dasselbe** Dokument. Die `sequence`-Nummer bestimmt die Reihenfolge. Nächster Unterzeichner wird erst eingeladen, wenn vorherige fertig sind.
+All participants sign **the same** document. The `sequence` number determines the order. Next signer is only invited when previous ones are done.
 
 ### SPREAD
-Jeder Teilnehmer (oder Gruppe mit gleicher Sequence-Nr.) bekommt eine **eigene Kopie** des Original-Dokuments.
+Each participant (or group with the same sequence number) gets their **own copy** of the original document.
 
-## API-Features für die NC-App relevant
+## API Features Relevant for the NC App
 
-### Für die Übersichtsseite:
-- `GET /api/list` - Paginierte Liste mit vielen Filtern (Status, Datum, Name, Metadaten-Suche)
-- `GET /api/list-status` - Kompakte Status-Info
-- Filter: `status`, `processName`, `fileName`, `initiatorName`, `signerName`, `searchQuery`, `dateFrom/To`, `metadataSearch`
-- Sortierung: `PROCESS_NAME`, `INITIATOR`, `FILENAME`, `CREATED`, `LAST_SIGNER_ACTION` + ASC/DESC
+### For the overview page:
+- `GET /api/list` - Paginated list with many filters (status, date, name, metadata search)
+- `GET /api/list-status` - Compact status info
+- Filters: `status`, `processName`, `fileName`, `initiatorName`, `signerName`, `searchQuery`, `dateFrom/To`, `metadataSearch`
+- Sorting: `PROCESS_NAME`, `INITIATOR`, `FILENAME`, `CREATED`, `LAST_SIGNER_ACTION` + ASC/DESC
 
-### Für den Sidebar-Tab:
-- `POST /api/find-by-original` - PDF-Datei senden → passende Prozesse finden
-- `GET /api/get-meta?id=...` - Detailinfos zu bekanntem Prozess
-- `GET /api/finished?id=...` - Fertiges PDF herunterladen
+### For the sidebar tab:
+- `POST /api/find-by-original` - Send PDF file → find matching processes
+- `GET /api/get-meta?id=...` - Detail info for known process
+- `GET /api/finished?id=...` - Download finished PDF
 
-### Für Prozess-Erstellung:
-- `POST /api/new` - Vollständiger Prozess per API
-- `POST /api/start-wizard` - Draft + Redirect zu sign-Wizard-UI
+### For process creation:
+- `POST /api/new` - Full process via API
+- `POST /api/start-wizard` - Draft + redirect to signd wizard UI
 
-### Für Metadaten-Tracking:
-- `apiClientMetaData` bei Prozesserstellung setzen (z.B. NC File-ID, Pfad, User)
-- `metadataSearch` bei `/api/list` zum Filtern nach NC-spezifischen Metadaten
-- `POST /api/update-client-metadata` zum Aktualisieren
+### For metadata tracking:
+- `apiClientMetaData` set on process creation (e.g. NC file ID, path, user)
+- `metadataSearch` on `/api/list` to filter by NC-specific metadata
+- `POST /api/update-client-metadata` to update
 
-### Für Statusänderungen:
-- `callbackUrl` bei Erstellung setzen → Webhook an NC-App
-- Alternativ: Polling via `GET /api/list-status` oder `GET /api/new-finished?gt=...`
+### For status changes:
+- `callbackUrl` set on creation → webhook to NC app
+- Alternative: Polling via `GET /api/list-status` or `GET /api/new-finished?gt=...`
 
-## Authentifizierung & Account-Verwaltung
-- Jeder Request (außer `/api/prices` und `/api/register-account`) braucht `X-API-KEY` im Header
-- API-Key erhält man via:
-  - Login (`/api/v2/api-login`) mit E-Mail/Passwort
-  - Registrierung (`/api/register-account`) - erstellt neuen Account + liefert API-Key
-  - Über das sign-UI (manuell)
-- Key ist account-gebunden
+## Authentication & Account Management
+- Every request (except `/api/prices` and `/api/register-account`) requires `X-API-KEY` in the header
+- API key is obtained via:
+  - Login (`/api/v2/api-login`) with email/password
+  - Registration (`/api/register-account`) - creates new account + returns API key
+  - Via the signd UI (manually)
+- Key is account-bound
 
-## Pricing-Modell
+## Pricing Model
 
-### Endpunkt: `POST /api/prices`
-- Kein API-Key nötig
-- Liefert Preise für `premium` und `enterprise` Plan
+### Endpoint: `POST /api/prices`
+- No API key required
+- Returns prices for `premium` and `enterprise` plans
 
-### PriceInfo-Struktur
-- `perProcess` - Preis pro Signaturprozess (nach Aufbrauch des Inklusiv-Kontingents)
-- `perMonthAndUser` - Monatspreis pro User
-- `includedProcessesPerMonth` - Inklusiv-Prozesse pro Monat
-- `sms` - Preis pro SMS-Einladung
-- `qes` - Preis pro qualifizierter elektronischer Signatur
+### PriceInfo Structure
+- `perProcess` - Price per signature process (after included quota is used up)
+- `perMonthAndUser` - Monthly price per user
+- `includedProcessesPerMonth` - Included processes per month
+- `sms` - Price per SMS invitation
+- `qes` - Price per qualified electronic signature
 
-## Account-Registrierung
+## Account Registration
 
-### Endpunkt: `POST /api/register-account`
-- Kein API-Key nötig (erstellt ja erst den Account)
+### Endpoint: `POST /api/register-account`
+- No API key required (it creates the account)
 
 ### RegisterAccountRequest
-**Felder:**
-- `productPlan` - `premium` oder `enterprise`
-- `organisation` - Organisationsname
-- `street`, `houseNumber`, `zipCode`, `city` - Adresse
-- `country` - Ländercode (default: `DE`)
-- `clearName` - Name des Kontoinhabers
-- `email` - E-Mail-Adresse
-- `password` - Passwort
-- `vatId` - USt-ID (optional)
-- `couponCode` - Gutschein-Code (optional)
-- `agbAccepted` - AGB akzeptiert (boolean)
-- `dsbAccepted` - Datenschutzerklärung akzeptiert (boolean)
-- `dlvSend` - AVV verschickt (boolean)
+**Fields:**
+- `productPlan` - `premium` or `enterprise`
+- `organisation` - Organization name
+- `street`, `houseNumber`, `zipCode`, `city` - Address
+- `country` - Country code (default: `DE`)
+- `clearName` - Account holder name
+- `email` - Email address
+- `password` - Password
+- `vatId` - VAT ID (optional)
+- `couponCode` - Coupon code (optional)
+- `agbAccepted` - ToS accepted (boolean)
+- `dsbAccepted` - Privacy policy accepted (boolean)
+- `dlvSend` - DPA sent (boolean)
 
 ### RegisterAccountResponse
-- `accountId` - UUID des erstellten Accounts
-- `userId` - Interne User-ID (int64)
-- `apiKey` - Generierter API-Key für weitere Requests
+- `accountId` - UUID of the created account
+- `userId` - Internal user ID (int64)
+- `apiKey` - Generated API key for further requests

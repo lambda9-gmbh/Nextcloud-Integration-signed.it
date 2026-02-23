@@ -1,34 +1,34 @@
-# Nextcloud App-Entwicklung - Recherche
+# Nextcloud App Development - Research
 
-> Siehe auch: [decisions.md](decisions.md) | [research-sign-api.md](research-sign-api.md) | [status.md](status.md)
+> See also: [decisions.md](decisions.md) | [research-sign-api.md](research-sign-api.md) | [status.md](status.md)
 
-## 1. App-Struktur & Scaffolding
+## 1. App Structure & Scaffolding
 
-### Offizielles App-Template
+### Official App Template
 - **Repository:** [github.com/nextcloud/app-template](https://github.com/nextcloud/app-template)
-- **Generator:** [apps.nextcloud.com/developer/apps/generate](https://apps.nextcloud.com/developer/apps/generate) - erzeugt ein App-Gerüst mit allen Platzhaltern vorausgefüllt
-- Es gibt **keinen** `occ`-Befehl zum Erzeugen neuer Apps
+- **Generator:** [apps.nextcloud.com/developer/apps/generate](https://apps.nextcloud.com/developer/apps/generate) - generates an app skeleton with all placeholders pre-filled
+- There is **no** `occ` command for creating new apps
 
-### Standard-Verzeichnisstruktur
+### Standard Directory Structure
 ```
 myapp/
   appinfo/
-    info.xml          # App-Metadaten (Pflicht)
-    routes.php        # API-Routen
+    info.xml          # App metadata (required)
+    routes.php        # API routes
   css/
   img/
-  js/                 # Build-Output (Vite)
+  js/                 # Build output (Vite)
   lib/
     AppInfo/
-      Application.php # Bootstrap-Klasse
+      Application.php # Bootstrap class
     Controller/
     Service/
     Db/
-  src/                # Vue/TypeScript-Quellcode
+  src/                # Vue/TypeScript source code
     main.ts
     App.vue
   templates/
-    main.php          # PHP-Template das Vue-App mounted
+    main.php          # PHP template that mounts Vue app
   tests/
   composer.json
   package.json
@@ -36,22 +36,22 @@ myapp/
   tsconfig.json
 ```
 
-## 2. Tech-Stack
+## 2. Tech Stack
 
-### Vorgegeben / Empfohlen
-| Bereich | Technologie | Status |
-|---------|-------------|--------|
-| Backend | **PHP 8.1+** | Pflicht |
-| Frontend | **Vue 3** | Empfohlen (Standard) |
-| Build | **Vite** (`@nextcloud/vite-config`) | Empfohlen (neu) |
+### Required / Recommended
+| Area | Technology | Status |
+|------|------------|--------|
+| Backend | **PHP 8.1+** | Required |
+| Frontend | **Vue 3** | Recommended (standard) |
+| Build | **Vite** (`@nextcloud/vite-config`) | Recommended (new) |
 | CSS | SCSS | Optional |
-| TypeScript | Ja | Empfohlen |
-| HTTP (Frontend) | `@nextcloud/axios` + `@nextcloud/router` | Standard |
-| HTTP (Backend) | `OCP\Http\Client\IClientService` | Pflicht für externe Requests |
-| UI-Komponenten | `@nextcloud/vue` (v8.x, ~99 Komponenten) | Standard |
-| Build (Legacy) | Webpack (`@nextcloud/webpack-vue-config`) | Nur für bestehende Apps |
+| TypeScript | Yes | Recommended |
+| HTTP (frontend) | `@nextcloud/axios` + `@nextcloud/router` | Standard |
+| HTTP (backend) | `OCP\Http\Client\IClientService` | Required for external requests |
+| UI components | `@nextcloud/vue` (v8.x, ~99 components) | Standard |
+| Build (legacy) | Webpack (`@nextcloud/webpack-vue-config`) | Only for existing apps |
 
-### Vite-Konfiguration (Minimal)
+### Vite Configuration (Minimal)
 ```javascript
 import { createAppConfig } from '@nextcloud/vite-config'
 
@@ -61,18 +61,18 @@ export default createAppConfig({
 })
 ```
 
-## 3. Sidebar-Tabs (Files App)
+## 3. Sidebar Tabs (Files App)
 
-### ACHTUNG: Zwei verschiedene APIs je nach NC-Version!
+### NOTE: Two different APIs depending on NC version!
 
 ---
 
-### A) Legacy API für NC 30-32: `OCA.Files.Sidebar.Tab`
+### A) Legacy API for NC 30-32: `OCA.Files.Sidebar.Tab`
 
-Verwendet `OCA.Files.Sidebar` mit framework-agnostischem mount/update/destroy Pattern.
-`@nextcloud/files` v3.x ist die passende Library-Version.
+Uses `OCA.Files.Sidebar` with a framework-agnostic mount/update/destroy pattern.
+`@nextcloud/files` v3.x is the matching library version.
 
-#### Registrierung
+#### Registration
 ```javascript
 import Vue from 'vue'
 import MyTab from './views/MySidebarTab.vue'
@@ -87,7 +87,7 @@ window.addEventListener('DOMContentLoaded', function() {
       name: t('signd', 'signd'),
       icon: 'icon-rename',
 
-      // fileInfo enthält: id, name, path, mountType, mimetype, size, etc.
+      // fileInfo contains: id, name, path, mountType, mimetype, size, etc.
       async mount(el, fileInfo, context) {
         if (tabInstance) {
           tabInstance.$destroy()
@@ -110,7 +110,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }
       },
 
-      // Optional: Tab nur für bestimmte Dateitypen anzeigen
+      // Optional: Only show tab for certain file types
       enabled(fileInfo) {
         return fileInfo && fileInfo.mimetype === 'application/pdf'
       },
@@ -121,12 +121,12 @@ window.addEventListener('DOMContentLoaded', function() {
 })
 ```
 
-#### Vue-Komponente (NC 30-32)
+#### Vue Component (NC 30-32)
 ```vue
 <template>
   <div class="signd-sidebar-tab">
     <h3>{{ fileInfo?.name }}</h3>
-    <!-- Tab-Inhalt -->
+    <!-- Tab content -->
   </div>
 </template>
 
@@ -141,29 +141,29 @@ export default {
   methods: {
     setFileInfo(fileInfo) {
       this.fileInfo = fileInfo
-      // Hier Daten laden wenn fileInfo sich ändert
+      // Load data here when fileInfo changes
     },
   },
 }
 </script>
 ```
 
-#### fileInfo-Objekt (Legacy)
-Das `fileInfo`-Objekt enthält u.a.:
-- `id` - File-ID
-- `name` - Dateiname
-- `path` - Pfad relativ zum User-Root
-- `mimetype` - MIME-Type
-- `size` - Dateigröße
-- `mountType` - Mount-Typ (z.B. "external")
+#### fileInfo Object (Legacy)
+The `fileInfo` object contains among others:
+- `id` - File ID
+- `name` - Filename
+- `path` - Path relative to user root
+- `mimetype` - MIME type
+- `size` - File size
+- `mountType` - Mount type (e.g. "external")
 
 ---
 
-### B) Neues API für NC 33+: `getSidebar().registerTab()` (Web Components)
+### B) New API for NC 33+: `getSidebar().registerTab()` (Web Components)
 
-Seit **NC 33** (18.02.2026) wurde `OCA.Files.Sidebar` entfernt. Neues API aus `@nextcloud/files` v4.x+.
+Since **NC 33** (2026-02-18), `OCA.Files.Sidebar` has been removed. New API from `@nextcloud/files` v4.x+.
 
-#### Registrierung
+#### Registration
 ```typescript
 import { getSidebar } from '@nextcloud/files'
 import { defineAsyncComponent, defineCustomElement } from 'vue'
@@ -191,7 +191,7 @@ getSidebar().registerTab({
 })
 ```
 
-#### Vue-Komponente (NC 33+)
+#### Vue Component (NC 33+)
 ```vue
 <template>
   <div class="signd-sidebar-tab">
@@ -211,17 +211,17 @@ export default {
 </script>
 ```
 
-**Wichtig:** `shadowRoot: false` verwenden, damit Nextcloud-Theming greift.
+**Important:** Use `shadowRoot: false` so that Nextcloud theming applies.
 
 ---
 
-### Konsequenz für unser Projekt
-v1 (NC 30-32) nutzt das Legacy-API (A). v2 (NC 33+) muss auf das neue API (B) migriert werden.
-Die Vue-Komponente selbst kann weitgehend identisch bleiben - nur die Registrierung und das Daten-Interface unterscheiden sich.
+### Consequence for Our Project
+v1 (NC 30-32) uses the legacy API (A). v2 (NC 33+) must migrate to the new API (B).
+The Vue component itself can remain largely identical — only the registration and the data interface differ.
 
-## 4. File Actions (Kontextmenü)
+## 4. File Actions (Context Menu)
 
-### API (ab NC 28 - `@nextcloud/files`)
+### API (from NC 28 - `@nextcloud/files`)
 ```typescript
 import { FileAction, registerFileAction } from '@nextcloud/files'
 import { t } from '@nextcloud/l10n'
@@ -239,14 +239,14 @@ registerFileAction(
     },
 
     async exec(node, view, dir) {
-      // Sidebar öffnen und Tab aktivieren
+      // Open sidebar and activate tab
       return true
     },
   })
 )
 ```
 
-### Skript-Laden via Event-Listener
+### Script Loading via Event Listener
 ```php
 // lib/Listener/LoadAdditionalListener.php
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
@@ -259,9 +259,9 @@ class LoadAdditionalListener implements IEventListener {
 }
 ```
 
-## 5. Backend: Externe API-Aufrufe
+## 5. Backend: External API Calls
 
-### IClientService (Pflicht für externe HTTP-Requests)
+### IClientService (Required for External HTTP Requests)
 ```php
 use OCP\Http\Client\IClientService;
 
@@ -282,7 +282,7 @@ class SignApiService {
 }
 ```
 
-### Initial State (PHP → JS ohne API-Call)
+### Initial State (PHP → JS Without API Call)
 ```php
 // PHP
 $initialStateService->provideInitialState('myapp', 'config', ['apiUrl' => $url]);
@@ -293,38 +293,38 @@ import { loadState } from '@nextcloud/initial-state'
 const config = loadState('myapp', 'config')
 ```
 
-## 6. Einstellungen (Settings)
+## 6. Settings
 
-### Zwei Ansätze:
+### Two Approaches:
 
-**a) Klassisch (ISettings):**
-- PHP-Klasse implementiert `OCP\Settings\ISettings`
-- Vue-Frontend für die Settings-Seite
-- Registrierung in `info.xml` unter `<settings>`
+**a) Classic (ISettings):**
+- PHP class implements `OCP\Settings\ISettings`
+- Vue frontend for the settings page
+- Registration in `info.xml` under `<settings>`
 
-**b) Deklarativ (ab NC 29):**
-- PHP-Klasse implementiert `IDeclarativeSettingsForm`
-- Kein Frontend-Code nötig
-- Feldtypen: TEXT, PASSWORD, EMAIL, URL, NUMBER, CHECKBOX, SELECT, etc.
-- Automatische Speicherung in `appconfig` (admin) / `preferences` (personal)
+**b) Declarative (from NC 29):**
+- PHP class implements `IDeclarativeSettingsForm`
+- No frontend code needed
+- Field types: TEXT, PASSWORD, EMAIL, URL, NUMBER, CHECKBOX, SELECT, etc.
+- Automatic storage in `appconfig` (admin) / `preferences` (personal)
 
-## 7. Docker-Entwicklungsumgebung
+## 7. Docker Development Environment
 
-### Empfohlen: Standalone-Container
+### Recommended: Standalone Container
 ```bash
-# Einfache NC-Instanz mit gemounteter App
+# Simple NC instance with mounted app
 docker run --rm -p 8080:80 \
   -v ~/code/myapp:/var/www/html/apps-extra/myapp \
   ghcr.io/juliusknorr/nextcloud-dev-php81:latest
 
-# Bestimmte Server-Version
+# Specific server version
 docker run --rm -p 8080:80 \
   -e SERVER_BRANCH=stable32 \
   -v ~/code/myapp:/var/www/html/apps-extra/myapp \
   ghcr.io/juliusknorr/nextcloud-dev-php81:latest
 ```
 
-### Minimale docker-compose
+### Minimal docker-compose
 ```yaml
 version: '3'
 services:
@@ -355,45 +355,45 @@ volumes:
   db_data:
 ```
 
-### Vollständige Dev-Umgebung
+### Full Dev Environment
 [github.com/juliusknorr/nextcloud-docker-dev](https://github.com/juliusknorr/nextcloud-docker-dev)
 
-## 8. App Store Veröffentlichung
+## 8. App Store Publication
 
-### Lizenz
-- **AGPL-3.0-or-later** (empfohlen) oder kompatible (Apache-2.0, GPL-3.0+, MIT, MPL-2.0)
+### License
+- **AGPL-3.0-or-later** (recommended) or compatible (Apache-2.0, GPL-3.0+, MIT, MPL-2.0)
 
-### Code-Signierung
-1. CSR generieren: `openssl req -nodes -newkey rsa:4096 -keyout app.key -out app.csr -subj "/CN=appid"`
-2. CSR als PR einreichen bei [github.com/nextcloud/app-certificate-requests](https://github.com/nextcloud/app-certificate-requests)
-3. App signieren: `occ integrity:sign-app --privateKey=... --certificate=... --path=...`
+### Code Signing
+1. Generate CSR: `openssl req -nodes -newkey rsa:4096 -keyout app.key -out app.csr -subj "/CN=appid"`
+2. Submit CSR as PR at [github.com/nextcloud/app-certificate-requests](https://github.com/nextcloud/app-certificate-requests)
+3. Sign app: `occ integrity:sign-app --privateKey=... --certificate=... --path=...`
 
-### info.xml Pflichtfelder
+### info.xml Required Fields
 - `<id>`, `<name>`, `<summary>`, `<description>`, `<version>`, `<licence>`
 - `<author>`, `<namespace>`, `<category>`, `<dependencies>`
-- `<bugs>` (Issue-Tracker URL), `<repository>`
+- `<bugs>` (issue tracker URL), `<repository>`
 
-### Wichtige Regeln
-- "Nextcloud" darf **nicht** im App-Namen vorkommen
-- Nur **öffentliche** NC-APIs verwenden
-- Kompatibilität max. auf aktuelle NC-Version + 1 setzen
-- App muss bei Deinstallation aufräumen
-- Externe Datenübertragung muss klar kommuniziert werden
+### Important Rules
+- "Nextcloud" must **not** appear in the app name
+- Only use **public** NC APIs
+- Set compatibility to current NC version + 1 at most
+- App must clean up on uninstall
+- External data transmission must be clearly communicated
 
-### Gültige Kategorien
+### Valid Categories
 `customization`, `files`, `games`, `integration`, `monitoring`, `multimedia`, `office`, `organization`, `security`, `social`, `tools`
 
-## 9. Nextcloud-Versionen (Stand Feb. 2026)
+## 9. Nextcloud Versions (as of Feb. 2026)
 
 | Version | Release | End of Life | Status |
 |---------|---------|-------------|--------|
-| **33** | 18.02.2026 | 2027-02 | Aktuell |
-| **32** | 27.09.2025 | 2026-09 | Supported |
-| **31** | 25.02.2025 | 2026-02 | Am Auslaufen |
-| 30 | 11.09.2024 | Okt 2025 | EOL |
-| 29 | März 2024 | März 2025 | EOL |
+| **33** | 2026-02-18 | 2027-02 | Current |
+| **32** | 2025-09-27 | 2026-09 | Supported |
+| **31** | 2025-02-25 | 2026-02 | Phasing out |
+| 30 | 2024-09-11 | Oct 2025 | EOL |
+| 29 | March 2024 | March 2025 | EOL |
 
-### Empfehlung für neue App
+### Recommendation for New App
 ```xml
 <dependencies>
     <php min-version="8.1"/>
@@ -401,14 +401,14 @@ volumes:
 </dependencies>
 ```
 
-## 10. Wichtige @nextcloud Pakete
+## 10. Key @nextcloud Packages
 
-| Paket | Zweck |
-|-------|-------|
-| `@nextcloud/vue` | UI-Komponenten (NcAppContent, NcButton, NcDialog, ...) |
-| `@nextcloud/files` | FileAction, Sidebar-Tab-Registrierung |
-| `@nextcloud/axios` | HTTP-Client (mit CSRF-Token) |
-| `@nextcloud/router` | `generateUrl()` für API-Pfade |
-| `@nextcloud/l10n` | `t()` und `n()` für Übersetzungen |
-| `@nextcloud/initial-state` | `loadState()` für PHP→JS Daten |
-| `@nextcloud/vite-config` | Vite Build-Konfiguration |
+| Package | Purpose |
+|---------|---------|
+| `@nextcloud/vue` | UI components (NcAppContent, NcButton, NcDialog, ...) |
+| `@nextcloud/files` | FileAction, sidebar tab registration |
+| `@nextcloud/axios` | HTTP client (with CSRF token) |
+| `@nextcloud/router` | `generateUrl()` for API paths |
+| `@nextcloud/l10n` | `t()` and `n()` for translations |
+| `@nextcloud/initial-state` | `loadState()` for PHP→JS data |
+| `@nextcloud/vite-config` | Vite build configuration |

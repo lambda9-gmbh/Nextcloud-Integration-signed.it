@@ -1,141 +1,55 @@
-# signd.it Integration – Nextcloud App
+# signd.it Integration
 
-Nextcloud-App zur Integration mit [signd.it](https://signd.it) (digitales Signieren von PDF-Dokumenten).
+Nextcloud app for integrating with [signd.it](https://signd.it) — digitally sign PDF documents directly from your Nextcloud.
 
-**NC 30–32** | PHP 8.1+ | Vue 3 | TypeScript | Vite
+**Compatible with Nextcloud 30, 31, and 32.**
 
-## Voraussetzungen
+## Features
 
-- Node.js 20+, npm 10+
-- Docker + Docker Compose
-- signd-Instanz (lokal: `localhost:7755` oder `signd.it`)
+- **Start PDF signing** — Launch signature processes directly from the file browser context menu
+- **Track status** — View signature status in the file sidebar (signers, progress)
+- **Download signed PDFs** — Retrieve finished signed documents back into your cloud
+- **Process overview** — See all running and completed signature processes at a glance, with filtering, search, and sorting
+- **Admin settings** — API key management via manual entry, login, or registration
 
-## Setup
+## Requirements
 
-```bash
-# Frontend-Dependencies installieren + bauen
-npm install
-npm run build
+- Nextcloud 30, 31, or 32
+- PHP 8.1+
+- A [signd.it](https://signd.it) account (API key)
 
-# Nextcloud + PostgreSQL starten (Default: NC 32)
-npm run up
+## Installation
 
-# App aktivieren + lokale API-Requests erlauben
-npm run enable-app
-npm run occ -- config:system:set allow_local_remote_servers --value=true --type=boolean
-```
+1. Extract the app into your Nextcloud apps directory (`apps/integration_signd/`)
+2. Enable the app in the Nextcloud admin panel or via CLI:
+   ```bash
+   occ app:enable integration_signd
+   ```
+3. Go to **Administration → signd.it** and enter your API key
 
-Nextcloud läuft unter **http://localhost:8080** (Login: `admin` / `admin`).
+## Usage
 
-## Entwicklung
+### Starting a signature process
 
-```bash
-npm run watch          # Frontend mit Hot-Reload
-npm run logs           # NC Container-Logs
-npm run occ -- app:list  # beliebiger occ-Befehl im Container
-npm run down           # Container stoppen
-npm run restart        # Container neu starten
-```
+1. Select a PDF file in the file browser
+2. Choose **"Digitally sign"** from the context menu
+3. The signd.it wizard opens — configure signers and start the process
 
-### Multi-Version Testing (NC 30, 31, 32)
+### Viewing status
 
-Die NC-Version wird über die Environment-Variable `NC_VERSION` gesteuert (Default: `32`). Jede Version hat eigene Docker-Volumes — Daten bleiben beim Wechsel erhalten, kein Konflikt.
+- Open the **signd.it** tab in the file sidebar to see all signature processes for that file
+- The link **"Show all processes"** leads to the overview page
 
-```bash
-# NC 30 starten
-NC_VERSION=30 npm run up
-npm run enable-app
+### Overview page
 
-# Wechsel auf NC 31
-npm run down
-NC_VERSION=31 npm run up
-npm run enable-app
+- Accessible via the **signd.it** navigation entry
+- Lists all signature processes with filters for status, date, search, and "Only mine"
+- Detail sidebar with refresh, cancel, and download actions
 
-# Zurück auf NC 32 (Default)
-npm run down
-npm run up
-```
+## License
 
-`npm run enable-app` ist nur beim ersten Start einer neuen Version nötig.
+AGPL-3.0-or-later — see [LICENSE](LICENSE).
 
-### signd-Server-URL
+## Development
 
-Standardmäßig `https://signd.it`. Für lokale Entwicklung setzt `docker-compose.yml` die Env-Variable `SIGND_BASE_URL=http://host.docker.internal:7755` im Container – damit erreicht PHP den signd-Server auf dem Host.
-
-Auflösungs-Reihenfolge (siehe `SignApiService::getApiUrl()`):
-1. App-Config (`occ config:app:set`)
-2. Env-Variable `SIGND_BASE_URL` (im Container gesetzt via `docker-compose.yml`)
-3. Default: `https://signd.it`
-
-Falls die URL manuell geändert werden soll:
-```bash
-npm run occ -- config:app:set integration_signd api_url --value=http://host.docker.internal:7755
-```
-
-## Tests
-
-### Backend (PHPUnit)
-
-```bash
-composer install
-vendor/bin/phpunit --testsuite Unit
-```
-
-Kein laufender NC-Server nötig — alle Unit-Tests nutzen Mocks für NC-Interfaces.
-
-### Frontend (Vitest)
-
-```bash
-npm install
-npm test              # einmaliger Lauf
-npm run test:watch    # Watch-Modus für Entwicklung
-```
-
-### E2E (Playwright)
-
-Voraussetzung: Docker-Umgebung + App müssen laufen.
-
-```bash
-npm run up && npm run build && npm run enable-app
-npm run test:e2e           # headless
-npm run test:e2e:headed    # mit Browser-Fenster
-```
-
-Teststruktur:
-```
-tests/
-  Unit/                 PHPUnit Unit-Tests (spiegelt lib/)
-  frontend/             Vitest Frontend-Tests (spiegelt src/)
-e2e/                    Playwright E2E-Tests
-  fixtures/             Test-Fixtures (Login etc.)
-```
-
-## Architektur
-
-```
-integration_signd/
-  appinfo/           info.xml, routes.php
-  lib/
-    AppInfo/          Application Bootstrap
-    Controller/       SettingsController, ProcessController
-    Db/               Process Entity + Mapper (oc_integration_signd_processes)
-    Listener/         LoadAdditionalScriptsEvent → lädt Frontend in Files-App
-    Migration/        DB-Schema
-    Service/          SignApiService (alle sign-API-Aufrufe)
-    Settings/         AdminSettings + AdminSection (NC Settings-Seite)
-  src/
-    settings/         Admin-Settings Vue-Komponenten (ApiKey, Login, Register)
-    views/            SigndSidebarTab
-    components/       ProcessList, ProcessStatus, StartProcessButton
-    services/api.ts   Frontend HTTP-Client
-    main-settings.ts  Entrypoint Admin-Settings
-    main-files.ts     Entrypoint Files-App (FileAction + Sidebar-Tab)
-  templates/          PHP-Templates
-```
-
-## Dokumentation
-
-- [docs/status.md](docs/status.md) — Entwicklungsstand + offene Punkte
-- [docs/decisions.md](docs/decisions.md) — Architektur-Entscheidungen
-- [docs/research-sign-api.md](docs/research-sign-api.md) — sign API Analyse
-- [docs/research-nextcloud-app-dev.md](docs/research-nextcloud-app-dev.md) — Nextcloud App-Entwicklung Recherche
+For development setup, build instructions, tests, and architecture details: [docs/development.md](docs/development.md)

@@ -1,130 +1,129 @@
 # signd.it Integration – Nextcloud App
 
-Nextcloud-App (v1, NC 30–32) zur Integration mit signd.it (digitales PDF-Signieren).
+Nextcloud app (v1, NC 30–32) for integration with signd.it (digital PDF signing).
 
-## Dokumentation
+## Documentation
 
-- **[docs/decisions.md](docs/decisions.md)** — Architektur-Entscheidungen (verbindlich, bei Widersprüchen maßgeblich)
-- **[docs/status.md](docs/status.md)** — Was ist fertig, was fehlt (Prio 1/2/3)
-- **[docs/edge-cases.md](docs/edge-cases.md)** — Fehlerszenarien & Bewertungen
-- **[docs/testplan.md](docs/testplan.md)** — Testplan aller drei Ebenen (PHPUnit, Vitest, Playwright)
-- **[docs/research-sign-api.md](docs/research-sign-api.md)** — signd API Analyse
-- **[docs/research-nextcloud-app-dev.md](docs/research-nextcloud-app-dev.md)** — NC App-Entwicklung Patterns
-- **signd OpenAPI Spec:** `../digisign/src/main/resources/static/api.yaml` (Quelle der Wahrheit)
+- **[docs/decisions.md](docs/decisions.md)** — Architecture decisions (authoritative, takes precedence on conflicts)
+- **[docs/status.md](docs/status.md)** — What's done, what's missing (priority 1/2/3)
+- **[docs/edge-cases.md](docs/edge-cases.md)** — Error scenarios & assessments
+- **[docs/research-sign-api.md](docs/research-sign-api.md)** — signd API analysis
+- **[docs/research-nextcloud-app-dev.md](docs/research-nextcloud-app-dev.md)** — NC app development patterns
+- **signd OpenAPI Spec:** `../digisign/src/main/resources/static/api.yaml` (source of truth)
 
-## Konventionen
+## Conventions
 
-- Sprache im Code: Englisch. Docs/Kommentare: Deutsch OK.
-- **NICHT** das bestehende sign-plugin anschauen — komplett neuer Ansatz.
+- Language in code: English.
+- Do **NOT** look at the existing sign-plugin — completely new approach.
 
-## Tech-Stack
+## Tech Stack
 
-| Bereich | Technologie |
-|---------|-------------|
+| Area | Technology |
+|------|------------|
 | Backend | PHP 8.1+, NC App Framework |
 | Frontend | Vue 3, TypeScript, Vite |
-| Build | `@nextcloud/vite-config`, drei Entrypoints |
-| NC-Pakete | `@nextcloud/vue` v8, `@nextcloud/files` v3, `@nextcloud/axios`, `@nextcloud/router`, `@nextcloud/l10n`, `@nextcloud/initial-state` |
-| DB | NC DB-Abstraktionsschicht (QBMapper), Tabelle `oc_integration_signd_processes` |
-| Dev | Docker (NC 30–32 + PostgreSQL), Frontend-Build nativ auf Host |
+| Build | `@nextcloud/vite-config`, three entrypoints |
+| NC packages | `@nextcloud/vue` v8, `@nextcloud/files` v3, `@nextcloud/axios`, `@nextcloud/router`, `@nextcloud/l10n`, `@nextcloud/initial-state` |
+| DB | NC DB abstraction layer (QBMapper), table `oc_integration_signd_processes` |
+| Dev | Docker (NC 30–32 + PostgreSQL), frontend build natively on host |
 
-## Projektstruktur
+## Project Structure
 
 ```
 appinfo/              info.xml, routes.php
 lib/
   Controller/         SettingsController, ProcessController, PageController, OverviewController
-  Service/            SignApiService (zentraler HTTP-Client für signd-API)
+  Service/            SignApiService (central HTTP client for signd API)
   Db/                 Process Entity + ProcessMapper
   Settings/           AdminSettings, AdminSection
-  Listener/           LoadAdditionalListener (injiziert Frontend in Files-App)
-  Migration/          DB-Schema
+  Listener/           LoadAdditionalListener (injects frontend into Files app)
+  Migration/          DB schema
 src/
-  settings/           Admin-Settings Vue-Komponenten
+  settings/           Admin settings Vue components
   views/              SigndSidebarTab, OverviewApp
   components/         ProcessList, ProcessStatus, StartProcessButton, SignerList
   components/overview/ OverviewToolbar, OverviewTable, OverviewPagination, ProcessDetail
-  services/api.ts     Frontend API-Client (Settings + Processes + Overview)
-  main-settings.ts    Entrypoint: Admin-Settings
-  main-files.ts       Entrypoint: FileAction + Sidebar-Tab (Legacy, NC 30-32)
-  main-overview.ts    Entrypoint: Übersichtsseite (Prozessliste + Detail-Sidebar)
+  services/api.ts     Frontend API client (Settings + Processes + Overview)
+  main-settings.ts    Entrypoint: Admin settings
+  main-files.ts       Entrypoint: FileAction + Sidebar tab (Legacy, NC 30-32)
+  main-overview.ts    Entrypoint: Overview page (process list + detail sidebar)
 tests/
-  Unit/               PHPUnit Unit-Tests (spiegelt lib/)
-  frontend/           Vitest Frontend-Tests (spiegelt src/)
-    setup.ts          Globale Mocks (@nextcloud/axios, router, l10n, initial-state)
-e2e/                  Playwright E2E-Tests
-  fixtures/           Test-Fixtures (Login etc.)
-docs/                 Entscheidungen, Recherche, Status
+  Unit/               PHPUnit unit tests (mirrors lib/)
+  frontend/           Vitest frontend tests (mirrors src/)
+    setup.ts          Global mocks (@nextcloud/axios, router, l10n, initial-state)
+e2e/                  Playwright E2E tests
+  fixtures/           Test fixtures (login etc.)
+docs/                 Decisions, research, status
 ```
 
-## Wichtige Dateien
+## Key Files
 
-| Datei | Zweck |
-|-------|-------|
-| `lib/Service/SignApiService.php` | Alle signd-API-Aufrufe, API-URL-Auflösung |
-| `lib/Controller/ProcessController.php` | Prozess-CRUD, Wizard-Start, PDF-Download |
-| `lib/Controller/SettingsController.php` | API-Key-Verwaltung (3 Wege) |
-| `lib/Controller/OverviewController.php` | Prozessliste (signd-API Proxy) + Cancel |
-| `src/services/api.ts` | Frontend HTTP-Client |
-| `src/main-files.ts` | FileAction + Sidebar-Tab-Registrierung |
-| `src/views/OverviewApp.vue` | Hauptkomponente Übersichtsseite |
-| `appinfo/routes.php` | Alle Backend-Routen |
+| File | Purpose |
+|------|---------|
+| `lib/Service/SignApiService.php` | All signd API calls, API URL resolution |
+| `lib/Controller/ProcessController.php` | Process CRUD, wizard start, PDF download |
+| `lib/Controller/SettingsController.php` | API key management (3 methods) |
+| `lib/Controller/OverviewController.php` | Process list (signd API proxy) + cancel |
+| `src/services/api.ts` | Frontend HTTP client |
+| `src/main-files.ts` | FileAction + sidebar tab registration |
+| `src/views/OverviewApp.vue` | Main component for overview page |
+| `appinfo/routes.php` | All backend routes |
 
-## Dev-Befehle
+## Dev Commands
 
 ```bash
-npm install && npm run build   # Frontend bauen
-docker compose up -d           # NC + DB starten
-npm run enable-app             # App aktivieren (integration_signd)
-npm run watch                  # Frontend-Dev mit Watch
-npm run logs                   # Container-Logs
+npm install && npm run build   # Build frontend
+docker compose up -d           # Start NC + DB
+npm run enable-app             # Enable app (integration_signd)
+npm run watch                  # Frontend dev with watch
+npm run logs                   # Container logs
 ```
 
-NC: http://localhost:8080 (admin/admin), signd lokal: localhost:7755
+NC: http://localhost:8080 (admin/admin), signd local: localhost:7755
 
 ## Tests
 
-Drei Testebenen, alle aktiv:
+Three test levels, all active:
 
-### PHPUnit (Backend Unit-Tests)
+### PHPUnit (Backend Unit Tests)
 
 ```bash
 composer install
 vendor/bin/phpunit --testsuite Unit
 ```
 
-- Config: `phpunit.xml`, Testsuites `Unit` + `Integration`
-- Tests in `tests/Unit/` — Struktur spiegelt `lib/`
-- Mocking: PHPUnit MockBuilder für NC-Interfaces (`IClientService`, `IConfig`, `LoggerInterface`)
-- `tests/bootstrap.php` registriert OCP-Namespace manuell (nextcloud/ocp hat kein eigenes Autoloading)
-- Kein laufender NC-Server nötig
+- Config: `phpunit.xml`, test suites `Unit` + `Integration`
+- Tests in `tests/Unit/` — structure mirrors `lib/`
+- Mocking: PHPUnit MockBuilder for NC interfaces (`IClientService`, `IConfig`, `LoggerInterface`)
+- `tests/bootstrap.php` manually registers OCP namespace (nextcloud/ocp has no autoloading)
+- No running NC server required
 
-### Vitest (Frontend Unit-/Komponenten-Tests)
+### Vitest (Frontend Unit/Component Tests)
 
 ```bash
-npm test              # einmaliger Lauf
-npm run test:watch    # Watch-Modus
+npm test              # single run
+npm run test:watch    # watch mode
 ```
 
-- Config: `vitest.config.ts` (separate Datei, nicht in vite.config.ts — `createAppConfig` nicht erweiterbar)
-- Tests in `tests/frontend/` — Struktur spiegelt `src/`
-- `tests/frontend/setup.ts` mockt `@nextcloud/axios`, `@nextcloud/router`, `@nextcloud/l10n`, `@nextcloud/initial-state`
-- `@nextcloud/vue`-Komponenten (NcButton etc.) als Stubs mit `inheritAttrs: false` in Tests
-- happy-dom als Test-Environment, globals aktiv
+- Config: `vitest.config.ts` (separate file, not in vite.config.ts — `createAppConfig` not extensible)
+- Tests in `tests/frontend/` — structure mirrors `src/`
+- `tests/frontend/setup.ts` mocks `@nextcloud/axios`, `@nextcloud/router`, `@nextcloud/l10n`, `@nextcloud/initial-state`
+- `@nextcloud/vue` components (NcButton etc.) as stubs with `inheritAttrs: false` in tests
+- happy-dom as test environment, globals enabled
 
-### Playwright (E2E-Tests)
+### Playwright (E2E Tests)
 
 ```bash
-# Voraussetzung: Docker-Umgebung + App müssen laufen
+# Prerequisite: Docker environment + app must be running
 npm run test:e2e           # headless
-npm run test:e2e:headed    # mit Browser-Fenster
+npm run test:e2e:headed    # with browser window
 ```
 
-- Config: `playwright.config.ts`, nur Chromium, single worker, baseURL `localhost:8080`
-- Tests in `e2e/`, Login-Fixture in `e2e/fixtures/auth.ts` (admin/admin)
+- Config: `playwright.config.ts`, Chromium only, single worker, baseURL `localhost:8080`
+- Tests in `e2e/`, login fixture in `e2e/fixtures/auth.ts` (admin/admin)
 
-### Konventionen
+### Conventions
 
-- PHP-Tests: `FooTest.php` testet `Foo.php`
-- Frontend-Tests: `foo.test.ts` mit `@vue/test-utils` für Komponenten
-- Neue Features/Bugfixes: passende Tests mitliefern
+- PHP tests: `FooTest.php` tests `Foo.php`
+- Frontend tests: `foo.test.ts` with `@vue/test-utils` for components
+- New features/bugfixes: include matching tests

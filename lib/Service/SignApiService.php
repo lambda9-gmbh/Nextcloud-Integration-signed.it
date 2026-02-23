@@ -24,13 +24,13 @@ class SignApiService {
     }
 
     public function getApiUrl(): string {
-        // 1. App config (per occ oder API gesetzt)
+        // 1. App config (set via occ or API)
         $configUrl = $this->config->getAppValue(Application::APP_ID, 'api_url', '');
         if ($configUrl !== '') {
             return rtrim($configUrl, '/');
         }
 
-        // 2. Environment variable (z.B. via docker-compose)
+        // 2. Environment variable (e.g. via docker-compose)
         $envUrl = getenv('SIGND_BASE_URL');
         if ($envUrl !== false && $envUrl !== '') {
             return rtrim($envUrl, '/');

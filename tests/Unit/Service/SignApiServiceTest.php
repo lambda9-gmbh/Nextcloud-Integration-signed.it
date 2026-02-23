@@ -37,7 +37,7 @@ class SignApiServiceTest extends TestCase {
         );
     }
 
-    // ── getApiUrl() 3-Wege-Fallback ──
+    // ── getApiUrl() 3-way fallback ──
 
     public function testGetApiUrlReturnsAppConfigWhenSet(): void {
         $this->config->method('getAppValue')
@@ -118,7 +118,7 @@ class SignApiServiceTest extends TestCase {
         $this->assertSame('SIGND_UNKNOWN_ERROR', $data['errorCode']);
     }
 
-    // ── login() ohne API-Key ──
+    // ── login() without API key ──
 
     public function testLoginSendsRequestWithoutApiKey(): void {
         // getApiUrl() needs api_url config → return empty to fall through to default
