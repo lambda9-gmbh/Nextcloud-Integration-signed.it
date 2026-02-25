@@ -35,14 +35,21 @@ const stubs = {
 	NcCheckboxRadioSwitch: {
 		name: 'NcCheckboxRadioSwitch',
 		inheritAttrs: false,
-		template: '<label class="nc-checkbox"><input type="checkbox" :checked="checked" @change="$emit(\'update:checked\', $event.target.checked)" /><slot /></label>',
-		props: ['checked', 'value', 'name', 'type', 'disabled'],
-		emits: ['update:checked'],
+		template: '<label class="nc-checkbox"><input type="checkbox" :checked="modelValue" @change="$emit(\'update:modelValue\', $event.target.checked)" /><slot /></label>',
+		props: ['modelValue', 'value', 'name', 'type', 'disabled'],
+		emits: ['update:modelValue'],
 	},
 	NcNoteCard: {
 		name: 'NcNoteCard',
 		template: '<div class="nc-note-card" :data-type="type"><slot /></div>',
 		props: ['type'],
+	},
+	NcSelect: {
+		name: 'NcSelect',
+		inheritAttrs: false,
+		template: '<select class="nc-select" @change="$emit(\'update:modelValue\', JSON.parse($event.target.value))"><option v-for="o in options" :key="o.code" :value="JSON.stringify(o)">{{ o.label }}</option></select>',
+		props: ['modelValue', 'options', 'placeholder', 'disabled', 'label', 'inputId'],
+		emits: ['update:modelValue'],
 	},
 	NcLoadingIcon: {
 		name: 'NcLoadingIcon',
@@ -66,18 +73,20 @@ async function fillRequiredFields(wrapper: ReturnType<typeof mountForm>) {
 	const inputs = wrapper.findAll('.nc-text-field')
 
 	// inputs[0] = organisation, [1] = street, [2] = houseNumber, [3] = zipCode,
-	// [4] = city, [5] = country (pre-filled DE), [6] = clearName, [7] = email,
-	// [8] = vatId (optional), [9] = couponCode (optional)
+	// [4] = city, [5] = clearName, [6] = email,
+	// [7] = vatId (optional), [8] = couponCode (optional)
 	await inputs[0].setValue('Test GmbH')
 	await inputs[1].setValue('Teststraße')
 	await inputs[2].setValue('42')
 	await inputs[3].setValue('12345')
 	await inputs[4].setValue('Berlin')
-	// Country pre-filled with DE — skip
-	await inputs[6].setValue('Max Mustermann')
-	await inputs[7].setValue('max@example.com')
+	await inputs[5].setValue('Max Mustermann')
+	await inputs[6].setValue('max@example.com')
 	// Password
 	await wrapper.find('.nc-password-field').setValue('secret123')
+
+	// Country select
+	;(wrapper.vm as any).form.country = 'DE'
 
 	// Checkboxes: [0]+[1] = plan radio buttons (from plan options),
 	// [2] = AGB, [3] = DSB
@@ -126,9 +135,9 @@ describe('RegisterForm', () => {
 		expect(registerBtn.attributes('disabled')).toBeUndefined()
 	})
 
-	it('defaults country to DE', () => {
+	it('defaults country to empty', () => {
 		const wrapper = mountForm()
-		expect((wrapper.vm as any).form.country).toBe('DE')
+		expect((wrapper.vm as any).form.country).toBe('')
 	})
 
 	it('defaults plan to premium', () => {
