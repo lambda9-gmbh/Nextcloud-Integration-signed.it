@@ -47,7 +47,8 @@ As of: 2026-02-22 | Version: 0.1.0 (initial)
 
 ### Priority 1 — Required before first release
 - [x] **Docker multi-version:** `NC_VERSION` environment variable (default: 32), isolated volumes per version. `NC_VERSION=30 npm run up` to switch.
-- [ ] **Repository URLs in info.xml:** Add `<bugs>` and `<repository>` once the repository is established.
+- [x] **Repository URLs in info.xml:** Add `<bugs>` and `<repository>` once the repository is established.
+- [ ] **CHANGELOG:** Create a CHANGELOG file (e.g. Keep a Changelog format) before first release.
 - [x] **Switch instance scoping to `ncInstanceId`:** `apiClientMetaData` and overview filter use stable NC `instanceid` instead of variable URL. See [edge-cases.md#9](edge-cases.md#9-nc-accessible-behind-different-urls).
 - [x] **Reduce local DB to mapping data:** Remove `status`, `process_name`, `created_at`, `updated_at` from `oc_signd_processes` — status always comes live from the signd API. Add `target_dir` (directory of the original at the time of start). See [decisions.md](decisions.md#data-ownership--local-db).
 - [x] **Download fallback when original file is deleted:** When `target_dir` no longer exists, fall back to user root with warning. See [edge-cases.md#1](edge-cases.md#1-original-pdf-deleted-after-process-start).

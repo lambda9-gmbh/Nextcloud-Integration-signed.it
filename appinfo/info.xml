@@ -19,9 +19,11 @@ Start signature processes directly from your file browser, track signing status,
     <author mail="support@lambda9.de">lambda9 GmbH</author>
     <namespace>IntegrationSignd</namespace>
     <category>integration</category>
+    <bugs>https://github.com/lambda9-gmbh/Nextcloud-Integration-signd.it/issues</bugs>
+    <repository type="git">https://github.com/lambda9-gmbh/Nextcloud-Integration-signd.it</repository>
 
     <dependencies>
-        <php min-version="8.1"/>
+        <php min-version="8.1" max-version="8.4"/>
         <nextcloud min-version="30" max-version="32"/>
     </dependencies>
 
