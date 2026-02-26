@@ -88,9 +88,9 @@ describe('ApiKeyForm', () => {
 		expect((wrapper.find('.nc-password-field').element as HTMLInputElement).value).toBe('')
 	})
 
-	it('shows error on failure', async () => {
+	it('shows invalid key error on any non-unreachable failure', async () => {
 		mockedSettingsApi.saveApiKey.mockRejectedValue({
-			response: { data: { error: 'Key invalid' } },
+			response: { data: { error: 'Not found', errorCode: 'SIGND_API_ERROR' } },
 		})
 
 		const wrapper = mountForm()
@@ -101,6 +101,7 @@ describe('ApiKeyForm', () => {
 
 		const error = wrapper.find('.nc-note-card[data-type="error"]')
 		expect(error.exists()).toBe(true)
+		expect(error.text()).toContain('Invalid API key')
 	})
 
 	it('shows specific error for SIGND_UNREACHABLE', async () => {
@@ -116,21 +117,6 @@ describe('ApiKeyForm', () => {
 
 		const error = wrapper.find('.nc-note-card[data-type="error"]')
 		expect(error.text()).toContain('Cannot reach')
-	})
-
-	it('shows specific error for SIGND_UNAUTHORIZED', async () => {
-		mockedSettingsApi.saveApiKey.mockRejectedValue({
-			response: { data: { errorCode: 'SIGND_UNAUTHORIZED' } },
-		})
-
-		const wrapper = mountForm()
-
-		await wrapper.find('.nc-password-field').setValue('key')
-		await wrapper.findAll('button').find(b => b.text().includes('Save'))!.trigger('click')
-		await flushPromises()
-
-		const error = wrapper.find('.nc-note-card[data-type="error"]')
-		expect(error.text()).toContain('Invalid API key')
 	})
 
 	it('re-enables button after error', async () => {

@@ -63,14 +63,6 @@ export default defineComponent({
     methods: {
         t,
 
-        errorMessageForCode(errorCode: string): string {
-            const messages: Record<string, string> = {
-                SIGND_UNREACHABLE: t('integration_signd', 'Cannot reach the signd.it server. Please try again later.'),
-                SIGND_UNAUTHORIZED: t('integration_signd', 'Invalid API key. Please check the key and try again.'),
-            }
-            return messages[errorCode] || t('integration_signd', 'Failed to save API key')
-        },
-
         async save() {
             this.isSaving = true
             this.error = ''
@@ -81,8 +73,11 @@ export default defineComponent({
                 this.$emit('saved', result)
             } catch (e: unknown) {
                 const error = e as { response?: { data?: { error?: string, errorCode?: string } } }
-                const errorCode = error.response?.data?.errorCode
-                this.error = errorCode ? this.errorMessageForCode(errorCode) : t('integration_signd', 'Failed to save API key')
+                if (error.response?.data?.errorCode === 'SIGND_UNREACHABLE') {
+                    this.error = t('integration_signd', 'Cannot reach the signd.it server. Please try again later.')
+                } else {
+                    this.error = t('integration_signd', 'Invalid API key. Please check the key and try again.')
+                }
             } finally {
                 this.isSaving = false
             }
