@@ -14,7 +14,7 @@ Start signature processes directly from your file browser, track signing status,
 - Automatic download of signed documents
 - Admin settings for API key management
 ]]></description>
-    <version>0.1.0</version>
+    <version>1.0.0</version>
     <licence>agpl</licence>
     <author mail="support@lambda9.de">lambda9 GmbH</author>
     <namespace>IntegrationSignd</namespace>

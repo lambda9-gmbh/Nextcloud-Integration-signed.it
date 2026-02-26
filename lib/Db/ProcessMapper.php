@@ -29,6 +29,16 @@ class ProcessMapper extends QBMapper {
     }
 
     /**
+     * @return Process[]
+     */
+    public function findAll(): array {
+        $qb = $this->db->getQueryBuilder();
+        $qb->select('*')->from($this->getTableName());
+
+        return $this->findEntities($qb);
+    }
+
+    /**
      * @throws DoesNotExistException
      */
     public function findByProcessId(string $processId): Process {

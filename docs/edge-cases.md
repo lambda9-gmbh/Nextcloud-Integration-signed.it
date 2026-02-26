@@ -32,10 +32,10 @@
 **Actions:**
 - [x] Store `target_dir` on process start
 - [x] Download: Fallback when target directory no longer exists
-- [ ] Cleanup job for orphaned entries (file_id no longer exists in NC)
+- [x] Cleanup job for orphaned entries (file_id no longer exists in NC)
 - [x] Overview shows processes correctly even without associated NC file (link grayed out/removed)
 
-**Status:** 🔧 Mostly done, only cleanup job outstanding (→ status.md priority 2)
+**Status:** ✅ Done
 
 ---
 

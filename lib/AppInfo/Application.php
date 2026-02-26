@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace OCA\IntegrationSignd\AppInfo;
 
 use OCA\Files\Event\LoadAdditionalScriptsEvent;
+use OCA\IntegrationSignd\BackgroundJob\CleanupOrphanedProcessesJob;
 use OCA\IntegrationSignd\Listener\LoadAdditionalListener;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
@@ -23,6 +24,8 @@ class Application extends App implements IBootstrap {
             LoadAdditionalScriptsEvent::class,
             LoadAdditionalListener::class
         );
+
+        $context->registerBackgroundJob(CleanupOrphanedProcessesJob::class);
     }
 
     public function boot(IBootContext $context): void {

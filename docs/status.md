@@ -1,6 +1,6 @@
 # Development Status
 
-As of: 2026-02-22 | Version: 0.1.0 (initial)
+As of: 2026-02-22 | Version: 1.0.0
 
 ## Implemented
 
@@ -48,7 +48,7 @@ As of: 2026-02-22 | Version: 0.1.0 (initial)
 ### Priority 1 — Required before first release
 - [x] **Docker multi-version:** `NC_VERSION` environment variable (default: 32), isolated volumes per version. `NC_VERSION=30 npm run up` to switch.
 - [x] **Repository URLs in info.xml:** Add `<bugs>` and `<repository>` once the repository is established.
-- [ ] **CHANGELOG:** Create a CHANGELOG file (e.g. Keep a Changelog format) before first release.
+- [x] **CHANGELOG:** Create a CHANGELOG file (e.g. Keep a Changelog format) before first release.
 - [x] **Switch instance scoping to `ncInstanceId`:** `apiClientMetaData` and overview filter use stable NC `instanceid` instead of variable URL. See [edge-cases.md#9](edge-cases.md#9-nc-accessible-behind-different-urls).
 - [x] **Reduce local DB to mapping data:** Remove `status`, `process_name`, `created_at`, `updated_at` from `oc_signd_processes` — status always comes live from the signd API. Add `target_dir` (directory of the original at the time of start). See [decisions.md](decisions.md#data-ownership--local-db).
 - [x] **Download fallback when original file is deleted:** When `target_dir` no longer exists, fall back to user root with warning. See [edge-cases.md#1](edge-cases.md#1-original-pdf-deleted-after-process-start).
@@ -56,13 +56,13 @@ As of: 2026-02-22 | Version: 0.1.0 (initial)
 - [x] **Wizard lifecycle in sidebar:** Add `resume-wizard` (resume draft) and `cancel-wizard` (cancel draft) to sidebar. Backend methods already exist in `SignApiService`. See [edge-cases.md#4](edge-cases.md#4-duplicate-process-start--wizard-handling).
 - [x] **Overview: Graceful file link:** When original file has been deleted, gray out/remove file link instead of error.
 
-### Priority 2 — Planned
+### Priority 2 — v1 (edge case)
+- [x] **Cleanup job for orphaned DB entries:** Background job checks if `file_id` still exists in NC, removes orphans. See [edge-cases.md#1](edge-cases.md#1-original-pdf-deleted-after-process-start).
+
+### Optional — v2+
 - [ ] **Automatic PDF sync-back:** Background job (NC cron) polling `GET /api/new-finished?gt=...` and automatically downloading finished PDFs. Currently manual download only.
 - [ ] **Configurable storage location:** Admin setting for target directory of signed PDFs. Currently always next to the original. _Note: Fallback behavior (user root when target_dir is missing) needs to be reviewed during implementation._
-- [ ] **Cleanup job for orphaned DB entries:** Background job checks if `file_id` still exists in NC, removes orphans. See [edge-cases.md#1](edge-cases.md#1-original-pdf-deleted-after-process-start).
-
-### Priority 3 — Later
-- [ ] **v2 (NC 33+):** Separate app version with web component-based sidebar tab (`getSidebar()`, `defineCustomElement`). See [research-nextcloud-app-dev.md](research-nextcloud-app-dev.md#b-new-api-for-nc-33-getsidebarregistertab-web-components).
+- [ ] **NC 33+ sidebar migration:** Web component-based sidebar tab (`getSidebar()`, `defineCustomElement`). See [research-nextcloud-app-dev.md](research-nextcloud-app-dev.md#b-new-api-for-nc-33-getsidebarregistertab-web-components).
 - [ ] **Full process creation in NC** (`/api/new`) instead of start-wizard only.
 - [ ] **Fine-grained permissions:** Admin configures which users/groups can start processes.
 - [ ] **Auto-polling:** Sidebar automatically polls every 30s while tab is visible.
