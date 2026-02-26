@@ -276,8 +276,12 @@ export default defineComponent({
                 const result = await settingsApi.register(this.form)
                 this.$emit('registered', result)
             } catch (e: unknown) {
-                const error = e as { response?: { data?: { error?: string } } }
-                this.error = error.response?.data?.error || t('integration_signd', 'Registration failed')
+                const error = e as { response?: { data?: { error?: string, errorCode?: string } } }
+                if (error.response?.data?.errorCode === 'SIGND_UNREACHABLE') {
+                    this.error = t('integration_signd', 'Cannot reach the signd.it server. Please try again later.')
+                } else {
+                    this.error = error.response?.data?.error || t('integration_signd', 'Registration failed')
+                }
             } finally {
                 this.isLoading = false
             }

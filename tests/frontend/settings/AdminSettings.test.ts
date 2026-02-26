@@ -128,6 +128,34 @@ describe('AdminSettings', () => {
 		expect(error.text()).toContain('no longer valid')
 	})
 
+	it('shows unreachable warning with disconnect button when key is set', () => {
+		const wrapper = mountSettings({
+			api_key_set: true,
+			api_key_valid: true,
+			signd_unreachable: true,
+		})
+
+		const warning = wrapper.find('.nc-note-card[data-type="warning"]')
+		expect(warning.exists()).toBe(true)
+		expect(warning.text()).toContain('Cannot reach')
+		// Should show disconnect button
+		const disconnectBtn = wrapper.findAll('button').find(b => b.text().includes('Disconnect'))
+		expect(disconnectBtn).toBeTruthy()
+		// Should not show invalid-key error or tabs
+		expect(wrapper.find('.nc-note-card[data-type="error"]').exists()).toBe(false)
+		expect(wrapper.findComponent(ApiKeyFormStub).exists()).toBe(false)
+	})
+
+	it('shows tabs when no key is set even if service is unreachable', () => {
+		const wrapper = mountSettings({
+			api_key_set: false,
+			signd_unreachable: true,
+		})
+
+		// Tabs should be visible so the user can configure
+		expect(wrapper.findComponent(ApiKeyFormStub).exists()).toBe(true)
+	})
+
 	it('shows disconnect button when key is set', () => {
 		const wrapper = mountSettings({ api_key_set: true })
 

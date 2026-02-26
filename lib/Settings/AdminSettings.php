@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace OCA\IntegrationSignd\Settings;
 
+use GuzzleHttp\Exception\ClientException;
 use OCA\IntegrationSignd\AppInfo\Application;
 use OCA\IntegrationSignd\Service\SignApiService;
 use OCP\AppFramework\Http\TemplateResponse;
@@ -30,10 +31,19 @@ class AdminSettings implements ISettings {
                 $userInfo = $this->signApiService->getUserInfo();
                 $this->initialState->provideInitialState('user_info', $userInfo);
                 $this->initialState->provideInitialState('api_key_valid', true);
-            } catch (\Exception $e) {
-                $this->logger->warning('Failed to fetch signd user info', ['exception' => $e]);
+                $this->initialState->provideInitialState('signd_unreachable', false);
+            } catch (ClientException $e) {
+                // Server responded with 4xx → API key is invalid
+                $this->logger->warning('signd API key validation failed', ['exception' => $e]);
                 $this->initialState->provideInitialState('user_info', null);
                 $this->initialState->provideInitialState('api_key_valid', false);
+                $this->initialState->provideInitialState('signd_unreachable', false);
+            } catch (\Exception $e) {
+                // Connection error → service unreachable, key status unknown
+                $this->logger->warning('Cannot reach signd.it server', ['exception' => $e]);
+                $this->initialState->provideInitialState('user_info', null);
+                $this->initialState->provideInitialState('api_key_valid', true);
+                $this->initialState->provideInitialState('signd_unreachable', true);
             }
         }
 

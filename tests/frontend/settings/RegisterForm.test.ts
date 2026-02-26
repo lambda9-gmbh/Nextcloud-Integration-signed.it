@@ -195,6 +195,23 @@ describe('RegisterForm', () => {
 		expect(error.text()).toContain('Email already exists')
 	})
 
+	it('shows unreachable error when service is down', async () => {
+		mockedSettingsApi.register.mockRejectedValue({
+			response: { data: { error: 'Cannot reach signd.it server', errorCode: 'SIGND_UNREACHABLE' } },
+		})
+
+		const wrapper = mountForm()
+		await flushPromises()
+
+		await fillRequiredFields(wrapper)
+		await wrapper.findAll('button').find(b => b.text().includes('Register'))!.trigger('click')
+		await flushPromises()
+
+		const error = wrapper.find('.nc-note-card[data-type="error"]')
+		expect(error.exists()).toBe(true)
+		expect(error.text()).toContain('Cannot reach')
+	})
+
 	it('has terms link pointing to correct URL', () => {
 		const wrapper = mountForm()
 

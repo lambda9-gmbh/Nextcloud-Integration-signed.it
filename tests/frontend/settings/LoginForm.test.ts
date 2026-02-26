@@ -111,6 +111,23 @@ describe('LoginForm', () => {
 		expect(error.text()).toContain('Invalid credentials')
 	})
 
+	it('shows unreachable error when service is down', async () => {
+		mockedSettingsApi.login.mockRejectedValue({
+			response: { data: { error: 'Cannot reach signd.it server', errorCode: 'SIGND_UNREACHABLE' } },
+		})
+
+		const wrapper = mountForm()
+
+		await wrapper.find('.nc-text-field').setValue('test@test.com')
+		await wrapper.find('.nc-password-field').setValue('pass')
+		await wrapper.findAll('button').find(b => b.text().includes('Login'))!.trigger('click')
+		await flushPromises()
+
+		const error = wrapper.find('.nc-note-card[data-type="error"]')
+		expect(error.exists()).toBe(true)
+		expect(error.text()).toContain('Cannot reach')
+	})
+
 	it('shows fallback error when no response message', async () => {
 		mockedSettingsApi.login.mockRejectedValue(new Error('Network error'))
 

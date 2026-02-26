@@ -108,14 +108,14 @@ class SignApiServiceTest extends TestCase {
         $this->assertSame('SIGND_API_ERROR', $data['errorCode']);
     }
 
-    public function testApiErrorResponseForGenericException(): void {
+    public function testApiErrorResponseForGenericExceptionReturnsUnreachable(): void {
         $exception = new \RuntimeException('Connection timeout');
         $response = SignApiService::apiErrorResponse($exception, 'Something went wrong', 503);
 
-        $this->assertSame(503, $response->getStatus());
+        $this->assertSame(Http::STATUS_BAD_GATEWAY, $response->getStatus());
         $data = $response->getData();
-        $this->assertSame('Something went wrong', $data['error']);
-        $this->assertSame('SIGND_UNKNOWN_ERROR', $data['errorCode']);
+        $this->assertSame('Cannot reach signd.it server', $data['error']);
+        $this->assertSame('SIGND_UNREACHABLE', $data['errorCode']);
     }
 
     // ── login() without API key ──

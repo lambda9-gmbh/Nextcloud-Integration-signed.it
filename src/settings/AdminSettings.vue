@@ -13,7 +13,21 @@
 
             <template v-else>
                 <!-- Status display -->
-                <div v-if="apiKeySet && !apiKeyValid" class="signd-status">
+                <div v-if="signdUnreachable && apiKeySet" class="signd-status">
+                    <NcNoteCard type="warning">
+                        <div class="signd-notecard-content">
+                            <div>
+                                {{ t('integration_signd', 'Cannot reach the signd.it server. Please try again later.') }}
+                            </div>
+                            <NcButton variant="tertiary"
+                                :disabled="isDisconnecting"
+                                @click="onDisconnect">
+                                {{ t('integration_signd', 'Disconnect') }}
+                            </NcButton>
+                        </div>
+                    </NcNoteCard>
+                </div>
+                <div v-else-if="apiKeySet && !apiKeyValid" class="signd-status">
                     <NcNoteCard type="error">
                         <div class="signd-notecard-content">
                             <div>
@@ -117,6 +131,7 @@ export default defineComponent({
             isDisconnecting: false,
             apiKeySet: loadState('integration_signd', 'api_key_set', false) as boolean,
             apiKeyValid: loadState('integration_signd', 'api_key_valid', true) as boolean,
+            signdUnreachable: loadState('integration_signd', 'signd_unreachable', false) as boolean,
             userInfo: loadState('integration_signd', 'user_info', null) as UserInfo | null,
             activeTab: 'apikey' as string,
         }

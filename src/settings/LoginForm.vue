@@ -83,8 +83,12 @@ export default defineComponent({
                 this.password = ''
                 this.$emit('logged-in', result)
             } catch (e: unknown) {
-                const error = e as { response?: { data?: { error?: string } } }
-                this.error = error.response?.data?.error || t('integration_signd', 'Login failed. Please check your credentials.')
+                const error = e as { response?: { data?: { error?: string, errorCode?: string } } }
+                if (error.response?.data?.errorCode === 'SIGND_UNREACHABLE') {
+                    this.error = t('integration_signd', 'Cannot reach the signd.it server. Please try again later.')
+                } else {
+                    this.error = error.response?.data?.error || t('integration_signd', 'Login failed. Please check your credentials.')
+                }
             } finally {
                 this.isLoading = false
             }

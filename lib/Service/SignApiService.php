@@ -9,7 +9,6 @@ use OCA\IntegrationSignd\AppInfo\Application;
 use OCP\AppFramework\Http;
 use OCP\AppFramework\Http\JSONResponse;
 use OCP\Http\Client\IClientService;
-use OCP\Http\Client\LocalServerException;
 use OCP\IConfig;
 use Psr\Log\LoggerInterface;
 
@@ -227,15 +226,11 @@ class SignApiService {
 
     /**
      * Convert a signd API exception into a JSONResponse with the original error message and status.
+     *
+     * If the server responded (ClientException with 4xx) → extract error details.
+     * Everything else (ConnectException, LocalServerException, timeout, 5xx, …) → SIGND_UNREACHABLE.
      */
     public static function apiErrorResponse(\Exception $e, string $fallbackMessage, int $fallbackStatus = 500): JSONResponse {
-        if ($e instanceof LocalServerException) {
-            return new JSONResponse([
-                'error' => 'Cannot reach signd.it server',
-                'errorCode' => 'SIGND_UNREACHABLE',
-            ], Http::STATUS_BAD_GATEWAY);
-        }
-
         if ($e instanceof ClientException && $e->hasResponse()) {
             $body = (string) $e->getResponse()->getBody();
             $status = $e->getResponse()->getStatusCode();
@@ -245,6 +240,9 @@ class SignApiService {
             return new JSONResponse(['error' => $message, 'errorCode' => $errorCode], $status);
         }
 
-        return new JSONResponse(['error' => $fallbackMessage, 'errorCode' => 'SIGND_UNKNOWN_ERROR'], $fallbackStatus);
+        return new JSONResponse([
+            'error' => 'Cannot reach signd.it server',
+            'errorCode' => 'SIGND_UNREACHABLE',
+        ], Http::STATUS_BAD_GATEWAY);
     }
 }
