@@ -2,7 +2,7 @@
 
 Nextcloud app for integrating with [signd.it](https://signd.it) — digitally sign PDF documents directly from your Nextcloud.
 
-**Compatible with Nextcloud 30, 31, and 32.**
+**Compatible with Nextcloud 33 and 34.**
 
 ## Features
 
@@ -14,8 +14,8 @@ Nextcloud app for integrating with [signd.it](https://signd.it) — digitally si
 
 ## Requirements
 
-- Nextcloud 30, 31, or 32
-- PHP 8.1+
+- Nextcloud 33 or 34
+- PHP 8.2+
 - A [signd.it](https://signd.it) account (API key)
 
 ## Installation

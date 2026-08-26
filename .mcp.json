@@ -7,12 +7,8 @@
     },
     "openapi": {
       "type": "stdio",
-      "command": "npx",
-      "args": [
-        "-y", "@ivotoby/openapi-mcp-server",
-        "--spec-file", "../digisign/src/main/resources/static/api.yaml",
-        "--api-base-url", "http://localhost:7755"
-      ]
+      "command": "bash",
+      "args": ["scripts/openapi-mcp.sh"]
     },
     "postgres": {
       "type": "stdio",

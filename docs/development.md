@@ -3,7 +3,8 @@
 ## Prerequisites
 
 - Node.js 20+, npm 10+
-- PHP 8.2+, Composer
+- PHP 8.3+, Composer (the released app still supports PHP 8.2; the development
+  dependencies target the Nextcloud 35 API)
 - Docker + Docker Compose
 
 ## Quick Start

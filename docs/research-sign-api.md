@@ -2,7 +2,7 @@
 
 > See also: [research-nextcloud-app-dev.md](research-nextcloud-app-dev.md)
 >
-> **OpenAPI Spec (source of truth):** `../digisign/src/main/resources/static/api.yaml`
+> **OpenAPI Spec (source of truth):** <https://signd.it/static/api.yaml>
 
 **Base URL:** (configurable, e.g. `https://signd.it`)
 **API Specification:** OpenAPI 3.0.3

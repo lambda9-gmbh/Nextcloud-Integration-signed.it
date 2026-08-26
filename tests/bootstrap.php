@@ -7,11 +7,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Stubs for internal NC classes referenced by OCP interfaces but not shipped
-// in the nextcloud/ocp package (e.g. IRootFolder extends OC\Hooks\Emitter).
-if (!interface_exists('OC\Hooks\Emitter', false)) {
-    eval('namespace OC\Hooks; interface Emitter {}');
-}
+// Stub for an internal NC class referenced by OCP but not shipped in the
+// nextcloud/ocp package.
 if (!class_exists('OC\User\NoUserException', false)) {
     eval('namespace OC\User; class NoUserException extends \Exception {}');
 }
